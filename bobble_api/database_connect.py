@@ -41,7 +41,7 @@ class DBConnection:
         self.cur.execute(sql)
         self.__disconnect__()
 def RunQuery(query):
-    conn = pymysql.connect(host='134.209.159.4', port=3366, user='root', passwd='MintAdz@1234', db='cric',autocommit=True)
+    conn = pymysql.connect(host='134.209.159.4', port=3366, user='root', passwd='MintAdz@1234', db='bobble',autocommit=True)
     cur = conn.cursor()
 
     cur.execute(query)
