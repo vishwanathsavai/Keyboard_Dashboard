@@ -10,6 +10,7 @@
 *	1	    Vishwanath P	Rajeeva B	01/Jul/22	0.1	     Initial Draft
 '''
 from . import views
+from . import dashboard_views
 import Django_Script
 
 from django.contrib import admin
@@ -25,5 +26,7 @@ urlpatterns = [
     path('mi/signup',views.SignupInit),
     path('mi/sendOTP',views.SendOTP),
     path('mi/sendEmailOTP',views.SendEmailOTP),
-    #path('sc/signupInit',views.SignupInit)
+    path('mi/common/brand',dashboard_views.Common_Dashboard),
+    path('mi/dashboard',dashboard_views.Dashboard_details),
+    path('mi/dashboard/instlUsr',dashboard_views.Dashboard_InstrUsr),
 ]

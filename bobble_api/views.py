@@ -34,13 +34,13 @@ def login(request):
 
             if '@' in email:
                 #query for the input data validation
-                query = '''select u.c_usrmta_rst_tkn ,u2.b_usr_blk  from usrmeta u ,`user` u2 ,userinfo u3 where u3.c_usrinf_eml = "'''+ email +'''" and u3.c_usrinf_pwd ="'''+ password +'''" and u3.n_usrinf_usr_id = u2.n_usr_id and u2.n_usr_id = u.n_usrmta_usr_id ;'''
+                query = '''select u.c_usrmta_rst_tkn ,u2.b_usr_blk  from bobble.usrmeta u ,bobble.user u2 ,bobble.userinfo u3  where u3.c_usrinf_eml = "'''+ email +'''" and u3.c_usrinf_pwd ="'''+ password +'''" and u3.n_usrinf_usr_id = u2.n_usr_id and u2.n_usr_id = u.n_usrmta_usr_id ;'''
                 print(query)
                 #token = database_connect.RunQuery(query)
                 token = db_run.fetch(sql=query)
             else:
                 # query for the input data validation
-                query = '''select u.c_usrmta_rst_tkn ,u2.b_usr_blk  from usrmeta u ,`user` u2 ,userinfo u3 where u3.c_usrinf_ph = "'''+ email +'''" and u3.c_usrinf_pwd ="'''+ password +'''" and u3.n_usrinf_usr_id = u2.n_usr_id and u2.n_usr_id = u.n_usrmta_usr_id ;'''
+                query = '''select u.c_usrmta_rst_tkn ,u2.b_usr_blk  from bobble.usrmeta u ,bobble.user u2 ,bobble.userinfo u3  where u3.c_usrinf_ph = "'''+ email +'''" and u3.c_usrinf_pwd ="'''+ password +'''" and u3.n_usrinf_usr_id = u2.n_usr_id and u2.n_usr_id = u.n_usrmta_usr_id ;'''
                 print(query)
                 # token = database_connect.RunQuery(query)
                 token = db_run.fetch(sql=query)
@@ -53,8 +53,8 @@ def login(request):
                 #logger.log('Invalid Credentials Provided', phone)
                 return HttpResponse(json.dumps(result), content_type='application/json')
             else:
-                user_token = token[0]['c_usrmta_rst_tkn']
-                user_blocked = token[0]['b_usr_blk']
+                user_token = token[0][0]
+                user_blocked = token[0][1]
                 print(user_token,user_blocked)
                 if len(user_token) > 5 and user_blocked==0:#Proper validation of user id and password
                     result = {
@@ -281,10 +281,10 @@ def SignupInit(request):
         otpPh = body["otpPh"]
         access_token = generate_access_token()#generate access token function is called
 
-        query = '''select (select sysdate() from dual) as sys_date ,max(n_usr_id) as 'max_val' from `user` u ;'''
+        query = '''select (select sysdate() from dual) as sys_date ,max(n_usr_id) as 'max_val' from bobble.user u ;'''
         result = db_run.fetch(query)
-        user_id = result[0]['max_val']
-        system_dt = result[0]['sys_date']
+        user_id = result[0][1]
+        system_dt = result[0][0]
         query = '''INSERT INTO bobble.`user`
 (n_usr_id, b_usr_del, b_usr_blk, b_usr_dactv, dt_usr_crtd_on, n_usr_rl_id, b_usr_pwd_rst)
 VALUES('''+str(user_id+1)+''', 0, 0, 0, "'''+str(system_dt)+'''", 1, 0);'''
@@ -294,6 +294,11 @@ VALUES('''+str(user_id+1)+''', 0, 0, 0, "'''+str(system_dt)+'''", 1, 0);'''
 ( n_usrinf_usr_id, c_usrinf_eml, c_usrinf_pwd, c_usrinf_fn, c_usrinf_ln, c_usrinf_des, c_usrinf_ph, c_usrinf_cmp)
 VALUES('''+str(user_id+1)+''', "'''+str(email)+'''", "'''+str(pwd)+'''", "'''+str(fname)+'''", "'''+str(lname)+'''", "'''+str(desg)+'''", "'''+str(phone)+'''", "'''+str(company)+'''");'''
         db_run.fetch(query_insert)
+        token_generated = generate_access_token()
+        query_usrmeta = '''INSERT INTO bobble.usrmeta
+( n_usrmta_usr_id, c_usrmta_iwt, c_usrmta_oauth, dt_usrmta_lst_rst_lnk, c_usrmta_rst_tkn, b_usrmta_apprvd, b_usrmta_ph_appvd, dt_usrmta_lgn, b_usrmta_rmbr_me)
+VALUES( '''+str(user_id+1)+''', 'jwt_2', 'oauth_2', "'''+str(system_dt)+'''", "'''+token_generated+'''", 1, 1, "'''+str(system_dt)+'''", 1);'''
+        db_run.fetch(query_usrmeta)
         #Insert Query is missing
         result = {
                  "code" : 1,
